@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 import { Observable, BehaviorSubject, tap } from 'rxjs';
 import {
   LoginRequest,
@@ -13,7 +14,7 @@ import {
   providedIn: 'root',
 })
 export class AuthService {
-  private readonly API_URL = '/api/v1/auth';
+  private readonly API_URL = `${environment.apiUrl}/auth`;
   private currentUserSubject = new BehaviorSubject<AuthUser | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
@@ -22,14 +23,21 @@ export class AuthService {
   }
 
   login(credentials: LoginRequest): Observable<LoginResponse> {
+    console.log('🔑 AuthService: Attempting login with URL:', `${this.API_URL}/login`);
+    console.log('🔑 AuthService: Credentials:', credentials);
+    
     return this.http
       .post<LoginResponse>(`${this.API_URL}/login`, credentials)
       .pipe(
         tap((response) => {
+          console.log('✅ AuthService: Login successful:', response);
           if (response.data) {
             this.setCurrentUser(response.data.user);
             this.setTokens(response.data.tokens);
           }
+        }),
+        tap(null, (error) => {
+          console.error('❌ AuthService: Login error:', error);
         })
       );
   }
