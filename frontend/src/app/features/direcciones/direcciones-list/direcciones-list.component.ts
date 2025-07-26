@@ -1,15 +1,22 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
+import {
+  FormsModule,
+  ReactiveFormsModule,
+  FormBuilder,
+  FormGroup,
+} from '@angular/forms';
 import { Router } from '@angular/router';
 import { DireccionService } from '../../../core/services/direccion.service';
 import { AlertService } from '../../../core/services/alert.service';
+import { HeaderComponent } from '../../../shared/components/header/header.component';
 
 @Component({
   selector: 'app-direcciones-list',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, HeaderComponent],
   template: `
+    <app-header></app-header>
     <div class="container-fluid py-4">
       <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
@@ -42,7 +49,11 @@ import { AlertService } from '../../../core/services/alert.service';
             </div>
             <div class="col-md-6">
               <label class="form-label">Estado</label>
-              <select class="form-select" formControlName="estado" (change)="filtrarDirecciones()">
+              <select
+                class="form-select"
+                formControlName="estado"
+                (change)="filtrarDirecciones()"
+              >
                 <option value="">Todos los estados</option>
                 <option value="true">Activos</option>
                 <option value="false">Inactivos</option>
@@ -64,12 +75,17 @@ import { AlertService } from '../../../core/services/alert.service';
 
           <!-- Lista de direcciones -->
           <div *ngIf="!cargando && direccionesFiltradas.length > 0" class="row">
-            <div class="col-md-6 col-lg-4 mb-4" *ngFor="let direccion of direccionesFiltradas">
+            <div
+              class="col-md-6 col-lg-4 mb-4"
+              *ngFor="let direccion of direccionesFiltradas"
+            >
               <div class="card h-100 border-start border-success border-4">
                 <div class="card-body">
-                  <div class="d-flex justify-content-between align-items-start mb-2">
+                  <div
+                    class="d-flex justify-content-between align-items-start mb-2"
+                  >
                     <h6 class="card-title text-success mb-0">
-                      {{ direccion.nombre }}
+                      {{ direccion.name }}
                     </h6>
                     <div class="dropdown">
                       <button
@@ -80,12 +96,20 @@ import { AlertService } from '../../../core/services/alert.service';
                       </button>
                       <ul class="dropdown-menu">
                         <li>
-                          <a class="dropdown-item" href="#" (click)="editarDireccion(direccion)">
+                          <a
+                            class="dropdown-item"
+                            href="#"
+                            (click)="editarDireccion(direccion)"
+                          >
                             <i class="bi bi-pencil me-2"></i>Editar
                           </a>
                         </li>
                         <li>
-                          <a class="dropdown-item text-danger" href="#" (click)="eliminarDireccion(direccion._id)">
+                          <a
+                            class="dropdown-item text-danger"
+                            href="#"
+                            (click)="eliminarDireccion(direccion._id)"
+                          >
                             <i class="bi bi-trash me-2"></i>Eliminar
                           </a>
                         </li>
@@ -93,17 +117,23 @@ import { AlertService } from '../../../core/services/alert.service';
                     </div>
                   </div>
                   <p class="card-text text-muted mb-3">
-                    {{ direccion.descripcion }}
+                    {{ direccion.description || 'Sin descripción' }}
                   </p>
-                  <div class="d-flex justify-content-between align-items-center">
+                  <div
+                    class="d-flex justify-content-between align-items-center"
+                  >
                     <span
                       class="badge"
-                      [class]="direccion.activo ? 'bg-success' : 'bg-secondary'"
+                      [class]="
+                        direccion.active !== false
+                          ? 'bg-success'
+                          : 'bg-secondary'
+                      "
                     >
-                      {{ direccion.activo ? 'Activo' : 'Inactivo' }}
+                      {{ direccion.active !== false ? 'Activo' : 'Inactivo' }}
                     </span>
                     <small class="text-muted">
-                      {{ direccion.departamentos?.length || 0 }} departamentos
+                      Creado: {{ direccion.createdAt | date : 'dd/MM/yyyy' }}
                     </small>
                   </div>
                 </div>
@@ -112,19 +142,34 @@ import { AlertService } from '../../../core/services/alert.service';
           </div>
 
           <!-- Estado vacío -->
-          <div class="text-center py-5" *ngIf="!cargando && direccionesFiltradas.length === 0">
+          <div
+            class="text-center py-5"
+            *ngIf="!cargando && direccionesFiltradas.length === 0"
+          >
             <i class="bi bi-building display-1 text-muted"></i>
             <h4 class="mt-3">
-              {{ direcciones.length === 0 ? 'No hay direcciones registradas' : 'No se encontraron direcciones' }}
+              {{
+                direcciones.length === 0
+                  ? 'No hay direcciones registradas'
+                  : 'No se encontraron direcciones'
+              }}
             </h4>
             <p class="text-muted">
-              {{ direcciones.length === 0 ? 'Comienza creando la primera dirección' : 'Intenta con otros filtros de búsqueda' }}
+              {{
+                direcciones.length === 0
+                  ? 'Comienza creando la primera dirección'
+                  : 'Intenta con otros filtros de búsqueda'
+              }}
             </p>
             <div class="d-flex gap-2 justify-content-center mt-4">
               <button class="btn btn-outline-primary" (click)="goBack()">
                 <i class="bi bi-arrow-left me-2"></i>Volver al Dashboard
               </button>
-              <button class="btn btn-primary" (click)="navigateToForm()" *ngIf="direcciones.length === 0">
+              <button
+                class="btn btn-primary"
+                (click)="navigateToForm()"
+                *ngIf="direcciones.length === 0"
+              >
                 <i class="bi bi-plus-circle me-2"></i>Crear Primera Dirección
               </button>
             </div>
@@ -195,20 +240,22 @@ export class DireccionesListComponent implements OnInit {
 
   filtrarDirecciones(): void {
     const filtros = this.filterForm.value;
-    this.direccionesFiltradas = this.direcciones.filter(direccion => {
-      const matchesBuscar = !filtros.buscar ||
-        direccion.nombre.toLowerCase().includes(filtros.buscar.toLowerCase()) ||
-        direccion.descripcion?.toLowerCase().includes(filtros.buscar.toLowerCase());
-      
-      const matchesEstado = filtros.estado === '' || 
-        direccion.activo.toString() === filtros.estado;
-      
+    this.direccionesFiltradas = this.direcciones.filter((direccion) => {
+      const matchesBuscar =
+        !filtros.buscar ||
+        direccion.name.toLowerCase().includes(filtros.buscar.toLowerCase());
+
+      const matchesEstado =
+        filtros.estado === '' ||
+        (filtros.estado === 'true' && direccion.active !== false) ||
+        (filtros.estado === 'false' && direccion.active === false);
+
       return matchesBuscar && matchesEstado;
     });
   }
 
   editarDireccion(direccion: any): void {
-    this.router.navigate(['/direcciones/editar', direccion._id]);
+    this.router.navigate(['/direcciones', direccion._id, 'editar']);
   }
 
   eliminarDireccion(id: string): void {
@@ -221,7 +268,7 @@ export class DireccionesListComponent implements OnInit {
         error: (error: any) => {
           console.error('Error eliminando dirección:', error);
           this.alertService.error('Error al eliminar dirección');
-        }
+        },
       });
     }
   }

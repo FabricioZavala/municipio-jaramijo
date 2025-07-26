@@ -144,6 +144,13 @@ export class FileService {
   }
 
   getFileIcon(mimetype: string): string {
+    console.log('🔍 FileService - getFileIcon called with mimetype:', mimetype);
+
+    if (!mimetype || typeof mimetype !== 'string') {
+      console.warn('⚠️ FileService - Invalid mimetype:', mimetype);
+      return 'bi bi-file-earmark text-secondary';
+    }
+
     if (mimetype.includes('pdf')) return 'bi bi-file-earmark-pdf text-danger';
     if (mimetype.includes('excel') || mimetype.includes('spreadsheet'))
       return 'bi bi-file-earmark-excel text-success';

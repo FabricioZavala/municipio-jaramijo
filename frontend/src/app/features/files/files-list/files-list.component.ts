@@ -491,12 +491,22 @@ export class FilesListComponent implements OnInit {
   }
 
   onFileSelected(event: any): void {
+    console.log(
+      '🔍 FilesListComponent - Archivos seleccionados:',
+      event.target.files
+    );
     const files = Array.from(event.target.files) as File[];
     this.procesarArchivos(files);
   }
 
   procesarArchivos(files: File[]): void {
+    console.log('🔍 FilesListComponent - Procesando archivos:', files);
     files.forEach((file) => {
+      console.log(
+        '🔍 FilesListComponent - Validando archivo:',
+        file.name,
+        file.type
+      );
       const validation = this.fileService.validateFile(file);
       if (validation.valid) {
         this.archivosSubida.push({
@@ -504,7 +514,14 @@ export class FilesListComponent implements OnInit {
           progress: 0,
           uploading: false,
         });
+        console.log(
+          '✅ FilesListComponent - Archivo agregado a la lista de subida'
+        );
       } else {
+        console.error(
+          '❌ FilesListComponent - Error de validación:',
+          validation.error
+        );
         this.alertService.error(validation.error || 'Error en archivo');
       }
     });
@@ -515,7 +532,15 @@ export class FilesListComponent implements OnInit {
   }
 
   subirArchivos(): void {
-    if (this.archivosSubida.length === 0) return;
+    console.log(
+      '🔍 FilesListComponent - Iniciando subida de archivos:',
+      this.archivosSubida.length
+    );
+
+    if (this.archivosSubida.length === 0) {
+      console.warn('⚠️ FilesListComponent - No hay archivos para subir');
+      return;
+    }
 
     this.subiendoArchivos = true;
 
@@ -565,14 +590,20 @@ export class FilesListComponent implements OnInit {
   }
 
   openUploadModal(): void {
+    console.log('🔍 FilesListComponent - Abriendo modal de subida de archivos');
     this.archivosSubida = [];
   }
 
   getFileIcon(mimetype: string): string {
-    return this.fileService.getFileIcon(mimetype);
+    console.log('🔍 FilesListComponent - getFileIcon called with:', mimetype);
+    return this.fileService.getFileIcon(mimetype || '');
   }
 
   getFileType(mimetype: string): string {
+    if (!mimetype || typeof mimetype !== 'string') {
+      return 'Archivo';
+    }
+
     if (mimetype.includes('pdf')) return 'PDF';
     if (mimetype.includes('excel') || mimetype.includes('spreadsheet'))
       return 'Excel';

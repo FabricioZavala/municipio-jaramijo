@@ -5,21 +5,28 @@ import { Router } from '@angular/router';
 import { UserService } from '../../../core/services/user.service';
 import { AlertService } from '../../../core/services/alert.service';
 import { User } from '../../../core/models';
+import { HeaderComponent } from '../../../shared/components/header/header.component';
 
 @Component({
   selector: 'app-usuarios-list',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, HeaderComponent],
   template: `
+    <app-header></app-header>
     <div class="container-fluid py-4">
       <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
           <h1 class="h3 mb-0">Usuarios</h1>
           <p class="text-muted">Gestión de usuarios del sistema</p>
         </div>
-        <button class="btn btn-primary" (click)="navigateToForm()">
-          <i class="bi bi-person-plus me-2"></i>Nuevo Usuario
-        </button>
+        <div>
+          <button class="btn btn-outline-secondary me-2" (click)="goBack()">
+            <i class="bi bi-arrow-left me-2"></i>Volver
+          </button>
+          <button class="btn btn-primary" (click)="navigateToForm()">
+            <i class="bi bi-person-plus me-2"></i>Nuevo Usuario
+          </button>
+        </div>
       </div>
 
       <!-- Filtros -->
@@ -76,6 +83,7 @@ import { User } from '../../../core/models';
                   <th>Usuario</th>
                   <th>Email</th>
                   <th>Departamento</th>
+                  <th>Roles</th>
                   <th>Estado</th>
                   <th>Fecha Registro</th>
                   <th>Acciones</th>
@@ -95,7 +103,12 @@ import { User } from '../../../core/models';
                     </div>
                   </td>
                   <td>{{ usuario.email }}</td>
-                  <td>{{ usuario.departamentoId || 'Sin asignar' }}</td>
+                  <td>{{ getDepartamentoName(usuario.departamentoId) }}</td>
+                  <td>
+                    <small class="text-muted">{{
+                      getRoleNames(usuario.roleIds)
+                    }}</small>
+                  </td>
                   <td>
                     <span
                       class="badge"
@@ -309,7 +322,29 @@ export class UsuariosListComponent implements OnInit {
     });
   }
 
+  getDepartamentoName(departamentoId: any): string {
+    if (typeof departamentoId === 'object' && departamentoId?.name) {
+      return departamentoId.name;
+    }
+    return 'Sin asignar';
+  }
+
+  getRoleNames(roleIds: any[]): string {
+    if (!roleIds || !Array.isArray(roleIds)) return 'Sin roles';
+    return roleIds
+      .map((role) => {
+        if (typeof role === 'object' && role?.name) {
+          return role.name;
+        }
+        return role;
+      })
+      .join(', ');
+  }
+
   navigateToForm(): void {
+    console.log(
+      '🔍 UsuariosListComponent - Navegando a formulario de nuevo usuario'
+    );
     this.router.navigate(['/usuarios/nuevo']);
   }
 

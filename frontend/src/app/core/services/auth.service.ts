@@ -23,9 +23,12 @@ export class AuthService {
   }
 
   login(credentials: LoginRequest): Observable<LoginResponse> {
-    console.log('🔑 AuthService: Attempting login with URL:', `${this.API_URL}/login`);
+    console.log(
+      '🔑 AuthService: Attempting login with URL:',
+      `${this.API_URL}/login`
+    );
     console.log('🔑 AuthService: Credentials:', credentials);
-    
+
     return this.http
       .post<LoginResponse>(`${this.API_URL}/login`, credentials)
       .pipe(
